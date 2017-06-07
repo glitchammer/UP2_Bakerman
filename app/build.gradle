@@ -16,6 +16,9 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+        buildTypes.each {
+            it.buildConfigField 'String', 'MIRIAMS_BAKING_RECIPES_URL', MIRIAMS_BAKING_RECIPES_URL
+        }
     }
 }
 
@@ -35,6 +38,8 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
 
     compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'org.apache.directory.studio:org.apache.commons.io:2.4'
+
 
     testCompile 'junit:junit:4.12'
 }

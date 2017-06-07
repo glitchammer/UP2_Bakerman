@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.AsyncTaskLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -15,9 +18,15 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 
+import org.apache.commons.io.IOUtils;
+
 import es.glitch.and.bugs.bakerman.dummy.DummyContent;
+import es.glitch.and.bugs.bakerman.model.Recipe;
+import es.glitch.and.bugs.bakerman.utilities.NetworkUtils;
 import timber.log.Timber;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 /**
@@ -28,8 +37,10 @@ import java.util.List;
  * item details. On tablets, the activity presents the list of items and
  * item details side-by-side using two vertical panes.
  */
-public class RecipeListActivity extends AppCompatActivity {
+public class RecipeListActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<List<Recipe>>{
 
+    private static final int LOADER_RECIPES = 10;
     /**
      * Whether or not the activity is in two-pane mode, i.e. running on a tablet
      * device.
@@ -45,6 +56,10 @@ public class RecipeListActivity extends AppCompatActivity {
         Timber.plant(new Timber.DebugTree());
         Timber.i("timber initialized. first log statement.");
 
+        // first load recipes
+        getSupportLoaderManager().initLoader(LOADER_RECIPES, null, this).forceLoad();
+
+        // meanwhile continue to setup the UI
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.setTitle(getTitle());
@@ -73,6 +88,34 @@ public class RecipeListActivity extends AppCompatActivity {
 
     private void setupRecyclerView(@NonNull RecyclerView recyclerView) {
         recyclerView.setAdapter(new SimpleItemRecyclerViewAdapter(DummyContent.ITEMS));
+    }
+
+    @Override
+    public Loader<List<Recipe>> onCreateLoader(int id, Bundle args) {
+        return new RecipeLoader(RecipeListActivity.this);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<List<Recipe>> loader, List<Recipe> data) {
+
+
+        // error occurred?
+        if (data==null) {
+
+            //todo show error dialog
+            String msgError = ((RecipeLoader)loader).getErrorMessage();
+
+            return;
+        }
+
+        // set data
+        Timber.i("Received data");
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<List<Recipe>> loader) {
+
     }
 
     public class SimpleItemRecyclerViewAdapter
