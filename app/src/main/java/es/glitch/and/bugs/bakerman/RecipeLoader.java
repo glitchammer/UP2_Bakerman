@@ -9,12 +9,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import es.glitch.and.bugs.bakerman.model.Recipe;
 import es.glitch.and.bugs.bakerman.utilities.NetworkUtils;
+import okhttp3.HttpUrl;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 import timber.log.Timber;
 
 /**
@@ -44,9 +50,11 @@ public class RecipeLoader extends AsyncTaskLoader<List<Recipe>> {
                 throw new IOException("No connection to "+url);
             }
 
-            // load recipes from url
-            String recipesJsonStr = IOUtils.toString(url.openStream());
+            // load recipes from url (make sure it follows redirects)
+            OkHttpClient client = new OkHttpClient.Builder().followRedirects(true).followSslRedirects(true).build();
+            Response response = client.newCall(new Request.Builder().url(url).build()).execute();
 
+            String recipesJsonStr = response.body().string();
 
             // parse json and create recipe list
             List<Recipe> recipes = new ArrayList<Recipe>();

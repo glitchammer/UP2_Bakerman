@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import timber.log.Timber;
+
 /**
  * Created by dnlbh on 10/04/2017.
  */
@@ -36,8 +38,11 @@ public class NetworkUtils {
                 URL urlServer = url;
                 HttpURLConnection urlConn = (HttpURLConnection) urlServer.openConnection();
                 urlConn.setConnectTimeout(3000); //<- 3Seconds Timeout
+                urlConn.setInstanceFollowRedirects(true);
                 urlConn.connect();
-                if (urlConn.getResponseCode() == 200) {
+                int rc = urlConn.getResponseCode();
+//                if (rc == 200 || rc==302) {
+                if (rc != -1) {
                     return true;
                 } else {
                     return false;
